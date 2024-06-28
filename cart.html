@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        
+        .todo-container {
+            background-color: white; 
+            border-radius: 8px;
+            box-shadow: 0 0 10px black;
+            width: 450px;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+        }
+        .cardWrapper {
+            height: 17em;
+            overflow: auto;
+            padding: 12px;
+        }
+        .header {
+            text-align: center; 
+            position: relative;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .cart-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .input-group {
+            margin: 0 0 6px 0px;
+        }
+        .dateTimeWrapper {
+            position: absolute;
+            bottom: 7%;
+            color: white;
+            z-index: 9;
+        }
+         img {
+            filter: brightness(0.5);
+         }
+        </style>
+</head>
+<body>
+    <div class="container-fluid ">
+        <div class="todo-container">
+            <div class="header">
+              <div class="dateTimeWrapper">
+                <h3 id="date">Friday, Jun 28, 2024</h3>
+                <h5 id="time">2:51:27 PM</h5>
+              </div>
+              <img src="https://img.freepik.com/free-photo/big-city_1127-3102.jpg" alt="Cityscape" class="img-fluid mb-2">
+            </div>
+            <div class="cardWrapper" id="cardWrapperDiv">
+                 
+            </div>
+           
+            <div class="input-group">
+              <input type="text" name="itemName" class="form-control" placeholder="Add new task">
+              <div class="input-group-append">
+                <button class="btn btn-primary" id="AddListBtn"> + </button>
+              </div>
+            </div>
+          </div>
+    </div>
+    
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        
+        document.addEventListener('DOMContentLoaded',function(){
+            // sessionStorage.removeItem('carditem');
+            let currentDateTime = new Date();
+            document.getElementById('date').innerHTML = currentDateTime
+            document.getElementById('time').innerHTML = new Date().toLocaleTimeString();
+
+            let storeData = sessionStorage.getItem('carditem');
+                if(storeData){
+                    storeData = JSON.parse(storeData);
+                    if(storeData.length > 0){
+                        storeData.forEach((value, index, array) => {
+                            debugger
+                            let ele = EleTemplate(value);
+                            document.getElementById('cardWrapperDiv').innerHTML  += ele;
+                        })
+                    } 
+                } 
+
+            let Btn = document.getElementById('AddListBtn');
+            Btn.addEventListener('click', function(){
+                let val = this.closest('.input-group').querySelector('input[name="itemName"]').value;
+                let ele = EleTemplate({value: val,checked: false});
+                document.getElementById('cardWrapperDiv').innerHTML  += ele;
+                
+                let storeData = sessionStorage.getItem('carditem');
+                if(storeData){
+                    storeData = JSON.parse(storeData);
+                    if(storeData.length > 0){
+                        storeData.push({value: val,checked: false});
+                        sessionStorage.setItem('carditem',  JSON.stringify(storeData));
+                    }else{
+                        sessionStorage.setItem('carditem',  JSON.stringify([{value: val,checked: false}]));
+                    }
+                }else{
+                    sessionStorage.setItem('carditem',  JSON.stringify([{value: val,checked: false}]));
+                }
+
+                this.closest('.input-group').querySelector('input[name="itemName"]').value = '';
+            });
+        });
+        function deleteItem(ele){
+            let val = ele.closest('.cart-item').querySelector('span').textContent;
+            let storeData = sessionStorage.getItem('carditem');
+                if(storeData){
+                    storeData = JSON.parse(storeData);
+                    if(storeData.length > 0){
+                        storeData = storeData.filter( (item) => item.value != val);
+                        sessionStorage.setItem('carditem',  JSON.stringify(storeData));
+                    }
+                } 
+                ele.closest('.cart-item').remove();
+        }
+        function itemChecked(ele){
+            
+            let val = ele.closest('.cart-item').querySelector('span').textContent;
+            let storeData = sessionStorage.getItem('carditem');
+                if(storeData){
+                    storeData = JSON.parse(storeData);
+                    if(storeData.length > 0){
+                        storeData.forEach(item => {
+                            if (item.value === val) {
+                                item. checked = ele.checked; 
+                            }
+                        });
+                        sessionStorage.setItem('carditem',  JSON.stringify(storeData));
+                    }
+                } 
+            console.log(ele);
+        }
+        function EleTemplate(data) {
+            let val = data.value;
+            let isChecked = data.checked?'checked':'';
+            let newVal = val.length > 50?'...':val;
+            return '<div class="cart-item"> <input type="checkbox" name="'+val+'" onclick="itemChecked(this)" '+isChecked+' > <span>'+newVal+'</span>\
+                    <button class="btn btn-danger btn-sm del-btn" onclick="deleteItem(this);" >Delete</button></div>';
+                    
+        }
+    </script>
+</body>
+</html>
